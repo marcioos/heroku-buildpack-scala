@@ -49,21 +49,27 @@ cd $BUILD_DIR
 
 # unpack cache
 CACHED_DIRS="$SBT_USER_HOME/.ivy2 $SBT_BINDIR target project/target project/boot"
+
+# removing SNAPSHOT.jar files to ensure we use latest
+for DIR in $CACHED_DIRS; do
+  find $DIR -iname \*SNAPSHOT\*.jar -exec echo "deleting" {} \; -exec rm {} \;
+done
+
 for DIR in $CACHED_DIRS; do
   cache_copy $DIR $CACHE_DIR $BUILD_DIR
 done
 
 # these are preliminary checks. actual version check happens below when attempting to download sbt boot.properties
 if ! test -e project/build.properties; then
-	echo " !      Error, your scala project must include project/build.properties and define sbt.version"
-	echo " !      You must use a release verison of sbt, sbt.version=0.11.0 or greater"
+  echo " !      Error, your scala project must include project/build.properties and define sbt.version"
+  echo " !      You must use a release verison of sbt, sbt.version=0.11.0 or greater"
         exit 1
 fi
 
 if ! has_supported_sbt_version ${BUILD_DIR}; then
-	echo " !      Error, you have defined an unsupported sbt.version in project/build.properties"
-	echo " !      You must use a release verison of sbt, sbt.version=0.11.0 or greater"
-	exit 1
+  echo " !      Error, you have defined an unsupported sbt.version in project/build.properties"
+  echo " !      You must use a release verison of sbt, sbt.version=0.11.0 or greater"
+  exit 1
 fi
  
 SBT_VERSION="$(get_supported_sbt_version ${BUILD_DIR})"
